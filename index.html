@@ -1,0 +1,146 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rain Maker</title>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="./loopify.js"></script>
+    <style>
+      * {
+        margin: 0;
+        border: 0;
+        color:#b97565
+      }
+      
+      
+      .container {
+        width: 100%;
+        height: 100%;
+        background-color:#373737;
+        background: linear-gradient(to bottom, #43026e, #03001e);  /* Chrome 10-25, Safari 5.1-6 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      .container div {
+        display: flex;
+        height: 200px;
+      }
+
+
+      div svg {
+        width: 100%;
+        margin: 0 auto;
+      }
+      .feather {
+        width: 80px;
+        height: 80px;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+      .controls svg {
+        width: 120px;
+        height: 120px;
+      }
+      input {
+        margin: 20 auto;
+        line-height: 5vh;
+        color: black;
+        width: 50%;
+        display: block;
+      }
+      
+      .menu {
+        margin-bottom: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <audio loop src="./short_rain.wav"></audio>
+    <div class="container">
+      <div class="menu">
+        <svg class="feather">
+          <use href="./feather-sprite.svg#cloud-rain" />
+        </svg>
+      </div>
+      <div class="controls">
+        <div id="play-btn">
+          <svg class="feather">
+            <use href="./feather-sprite.svg#play" />
+          </svg>
+        </div>
+        <div id="stop-btn" class="">
+          <svg class="feather">
+            <use href="./feather-sprite.svg#stop-circle" />
+          </svg>
+        </div>
+      </div>
+      <input
+        type="range"
+        id="volume"
+        class="control-volume"
+        min="0"
+        max="1"
+        value="0.50"
+        list="gain-vals"
+        step="0.01"
+      />
+      <!-- <datalist id="gain-vals">
+        <option value="0" label="min"></option>
+        <option value="1" label="max"></option>
+      </datalist> -->
+    </div>
+
+    <script>
+      const q = (selector, target = document) => target.querySelector(selector);
+      const qa = (selector) => document.querySelectorAll(selector);
+      const playBtn = q("#play-btn");
+      const stopBtn = q("#stop-btn");
+      const volumeControl = q('#volume');
+      const audio = q("audio");
+      let playing = false;
+
+      let loop;
+      loopify("./short_rain.wav", (err, loopy) => {
+        if (err) {
+          return console.err(err);
+        }
+        loop = loopy;
+      });
+
+      volumeControl.addEventListener("input", () => {
+        loop.vol(volumeControl.value);
+      });
+
+      playBtn.addEventListener("click", () => {
+        if(playing) return;
+    
+        const ramp = (v)=>{
+          setTimeout(()=>{
+            loop.vol(v);
+          },400)
+        }
+
+        let volume = loop.vol(0);
+        loop.play();
+        let targetVol = +volumeControl.value;
+        while(volume <= targetVol){
+          volume = volume + .1;
+          ramp(volume)
+        }
+
+        playing = true;
+      });
+
+      stopBtn.addEventListener("click", () => {
+        if(!playing) return;
+        loop.stop();
+        playing = false;
+      });
+    </script>
+  </body>
+</html>
